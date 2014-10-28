@@ -6,10 +6,11 @@ import os
 import re
 
 
-date_format = re.compile(br'^[0-9]{2,12}\.[0-9]{3}$')
-
-
+DESTINATION = b'.'  # Current directory
 MAX_SIZE = 524288  # 512 KiB
+
+
+date_format = re.compile(br'^[0-9]{2,12}\.[0-9]{3}$')
 
 
 def store(report):
@@ -23,7 +24,7 @@ def store(report):
                 filename = b'report_' + date + b'.txt'
                 if os.path.exists(filename):
                     return "file exists"
-                with open(filename, 'wb') as fp:
+                with open(os.path.join(DESTINATION, filename), 'wb') as fp:
                     fp.write(report)
                 return None
             else:
