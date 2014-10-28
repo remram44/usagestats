@@ -77,12 +77,12 @@ def application(environ, start_response):
 
 
 if __name__ == '__main__':
-    from wsgiref.simple_server import make_server
+    from twisted.internet import reactor
+    from twisted.web import server
+    from twisted.web.wsgi import WSGIResource
 
-    httpd = make_server(
-        '',
-        8000,
-        application)
+    resource = WSGIResource(reactor, reactor.getThreadPool(), application)
 
-    # Wait for a single request, serve it and quit.
-    httpd.handle_request()
+    site = server.Site(resource)
+    reactor.listenTCP(8000, site)
+    reactor.run()
