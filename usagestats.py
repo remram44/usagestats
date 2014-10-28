@@ -45,8 +45,8 @@ def OPERATING_SYSTEM(stats, info):
 
 def SESSION_TIME(stats, info):
     duration = time.time() - stats.started_time
-    secs = long(duration)
-    msecs = long((duration - secs) * 1000)
+    secs = int(duration)
+    msecs = int((duration - secs) * 1000)
     info.append(('session_time', '%d.%d' % (secs, msecs)))
 
 
@@ -156,8 +156,8 @@ class Stats(object):
             flag(self, all_info)
 
         now = time.time()
-        secs = long(now)
-        msecs = long((now - secs) * 1000)
+        secs = int(now)
+        msecs = int((now - secs) * 1000)
         all_info.insert(0, ('date', '%d.%d' % (secs, msecs)))
 
         if self.user_id:
@@ -180,7 +180,7 @@ class Stats(object):
             try:
                 with open(fullname, 'rb') as fp:
                     requests.post(self.drop_point, data=fp)
-            except Exception, e:
+            except Exception as e:
                 logger.warning("Couldn't upload %s: %s", old_filename, str(e))
                 break
             else:
