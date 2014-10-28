@@ -5,6 +5,9 @@ import requests
 import time
 
 
+__version__ = '0.1'
+
+
 logger = logging.getLogger('usagestats')
 
 
@@ -34,8 +37,10 @@ class Prompt(object):
 
 def OPERATING_SYSTEM(stats, info):
     info.append(('architecture', platform.machine().lower()))
-    info.append(('distribution', platform.linux_distribution()[0:2]))
-    info.append(('system', "%s; %s" % (platform.system(), platform.release())))
+    info.append(('distribution',
+                 "%s;%s" % (platform.linux_distribution()[0:2])))
+    info.append(('system',
+                 "%s;%s" % (platform.system(), platform.release())))
 
 
 def SESSION_TIME(stats, info):
@@ -68,7 +73,7 @@ class Stats(object):
         self.started_time = time.time()
 
         self.enabled = Stats.UNSET
-        self.location = location
+        self.location = os.path.expanduser(location)
         self.drop_point = drop_point
         self.version = version
 
@@ -99,7 +104,7 @@ class Stats(object):
 
         if self.enabled and unique_user_id:
             user_id_file = os.path.join(self.location, 'user_id')
-            if os.path.exists():
+            if os.path.exists(user_id_file):
                 with open(user_id_file, 'r') as fp:
                     self.user_id = fp.read().strip()
             else:
@@ -153,7 +158,12 @@ class Stats(object):
         now = time.time()
         secs = long(now)
         msecs = long((now - secs) * 1000)
-        all_info.insert(0, ('date', '%d:%d' % (secs, msecs)))
+        all_info.insert(0, ('date', '%d.%d' % (secs, msecs)))
+
+        if self.user_id:
+            all_info.insert(1, ('user', self.user_id))
+
+        logger.info("Generated report:\n%r" % (all_info,))
 
         # Current report
         filename = 'report_%d_%d.txt' % (secs, msecs)
@@ -163,7 +173,8 @@ class Stats(object):
 
         # Post previous reports
         old_reports = [f for f in os.listdir(self.location)
-                       if f.startswith('report_')].sort()
+                       if f.startswith('report_')]
+        old_reports.sort()
         for old_filename in old_reports:
             fullname = os.path.join(self.location, old_filename)
             try:
@@ -178,8 +189,9 @@ class Stats(object):
 
         # Post current report
         try:
-            requests.post(self.drop_point, data=generator())
-        except Exception, e:
+            r = requests.post(self.drop_point, data=generator())
+            r.raise_for_status()
+        except requests.RequestException as e:
             logger.warning("Couldn't upload report: %s", str(e))
             fullname = os.path.join(self.location, filename)
             with open(fullname, 'wb') as fp:

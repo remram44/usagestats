@@ -33,7 +33,9 @@ your project's requirements and using the library. Here is an example::
 
 
     def main():
-        if sys.argv.get(1) == '--enable-stats':
+        if len(sys.argv) < 2:
+            pass
+        elif sys.argv.get(1) == '--enable-stats':
             stats.enable_reporting()
             sys.exit(0)
         elif sys.argv.get(1) == '--disable-stats':
@@ -52,6 +54,9 @@ your project's requirements and using the library. Here is an example::
             usagestats.OPERATING_SYSTEM,  # Operating system/distribution
             usagestats.SESSION_TIME,      # Time since Stats object was created
         )
+
+    if __name__ == '__main__':
+        main()
 
 `submit()` will, by default, store the info in the specified directory. Nothing
 will be reported until the user opts in; a message will simply be printed to
