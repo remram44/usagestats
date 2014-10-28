@@ -13,7 +13,7 @@ MAX_SIZE = 524288  # 512 KiB
 date_format = re.compile(br'^[0-9]{2,12}\.[0-9]{3}$')
 
 
-def store(report):
+def store(report, address):
     """Stores the report on disk.
     """
     lines = [l for l in report.split(b'\n') if l]
@@ -25,6 +25,9 @@ def store(report):
                 if os.path.exists(filename):
                     return "file exists"
                 with open(os.path.join(DESTINATION, filename), 'wb') as fp:
+                    if not isinstance(address, bytes):
+                        address = address.encode('ascii')
+                    fp.write(b'remote_addr:' + address + b'\n')
                     fp.write(report)
                 return None
             else:
@@ -50,7 +53,7 @@ def application(environ, start_response):
     request_body = environ['wsgi.input'].read(request_body_size)
 
     # Tries to store
-    response_body = store(request_body)
+    response_body = store(request_body, environ.get('REMOTE_ADDR'))
     if not response_body:
         status = '200 OK'
         response_body = "stored"
