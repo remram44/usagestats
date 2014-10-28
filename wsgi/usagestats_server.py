@@ -39,18 +39,30 @@ def application(environ, start_response):
     """WSGI interface.
     """
 
+    def send_response(status, body):
+        if not isinstance(body, bytes):
+            body = body.encode('utf-8')
+
+        start_response(status, [('Content-Type', 'text/plain'),
+                                ('Content-Length', '%d' % len(body))])
+        return [body]
+
+
+    if environ['REQUEST_METHOD'] != 'POST':
+        return send_response('403 Forbidden', "invalid request")
+
     # Gets the posted input
+    request_body = b''
     try:
         request_body_size = int(environ.get('CONTENT_LENGTH', 0))
-        if request_body_size > MAX_SIZE:
-            response_body = b"Report too big"
-            start_response('403 Forbidden',
-                           [('Content-Type', 'text/plain'),
-                            ('Content-Length', '%d' % len(response_body))])
-            return [response_body]
+        if request_body_size < MAX_SIZE:
+            request_body = environ['wsgi.input'].read(request_body_size)
     except ValueError:
-        request_body_size = MAX_SIZE
-    request_body = environ['wsgi.input'].read(request_body_size)
+        request_body = environ['wsgi.input'].read(MAX_SIZE)
+        request_body_size = len(request_body)
+
+    if request_body_size >= MAX_SIZE:
+        return send_response('403 Forbidden', "report too big")
 
     # Tries to store
     response_body = store(request_body, environ.get('REMOTE_ADDR'))
@@ -60,13 +72,8 @@ def application(environ, start_response):
     else:
         status = '501 Server Error'
 
-    if not isinstance(response_body, bytes):
-        response_body = response_body.encode('utf-8')
-
     # Sends the response
-    start_response(status, [('Content-Type', 'text/plain'),
-                            ('Content-Length', '%d' % len(response_body))])
-    return [response_body]
+    return send_response(status, response_body)
 
 
 if __name__ == '__main__':
