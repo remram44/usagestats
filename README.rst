@@ -69,3 +69,12 @@ stderr::
     If you do not want to see this message again, you can run:
         cool_program --disable-stats
     Nothing will be uploaded before you opt in.
+
+Server
+------
+
+To collect the reports, any server will do; the reports are uploaded via POST
+as a LF-separated list of ``key:value`` pairs. A simple script for mod_wsgi is
+included; it writes each report to a separate file. Writing your own
+implementation in your language of choice (PHP, Java) with your own backend
+should be fairly straightforward.
