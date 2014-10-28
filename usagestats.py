@@ -209,3 +209,7 @@ class Stats(object):
                     fp.write(l)
         else:
             logger.info("Submitted current report")
+
+        # Show prompt
+        if self.enabled is Stats.UNSET:
+            sys.stderr.write(self.prompt)
