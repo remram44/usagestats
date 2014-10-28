@@ -75,10 +75,15 @@ class Stats(object):
     DISABLED, ENABLED, UNSET = range(3)
 
     def __init__(self, location, prompt, drop_point,
-                 version, unique_user_id=False):
+                 version, unique_user_id=False,
+                 env_var='PYTHON_USAGE_STATS'):
         self.started_time = time.time()
 
-        self.enabled = Stats.UNSET
+        env_var = os.environ.get(env_var).lower()
+        if env_var not in (None, '', '1', 'on', 'enabled', 'yes', 'true'):
+            self.enabled = Stats.DISABLED
+        else:
+            self.enabled = Stats.UNSET
         self.location = os.path.expanduser(location)
         self.drop_point = drop_point
         self.version = version
