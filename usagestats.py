@@ -153,9 +153,13 @@ class Stats(object):
             return info
 
     def note(self, info):
-        self.notes.extend(self._to_notes(info))
+        if self.enabled:
+            self.notes.extend(self._to_notes(info))
 
     def submit(self, info, *flags):
+        if not self.enabled:
+            return
+
         all_info, self.notes = self.notes, None
         all_info.extend(self._to_notes(info))
         for flag in flags:
