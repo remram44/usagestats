@@ -19,7 +19,7 @@ def list_files(d, root):
 with open('README.rst') as fp:
     description = fp.read()
 setup(name='usagestats',
-      version='0.1',
+      version='0.2',
       py_modules=['usagestats'],
       description="Anonymous usage statistics collecter",
       install_requires=['requests'],
