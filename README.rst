@@ -52,6 +52,7 @@ your project's requirements and using the library. Here is an example::
             {'what': 'Ran the program'},
             # Flags making usagestats insert more details
             usagestats.OPERATING_SYSTEM,  # Operating system/distribution
+            usagestats.PYTHON_VERSION,    # Python version info
             usagestats.SESSION_TIME,      # Time since Stats object was created
         )
 

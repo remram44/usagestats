@@ -3,6 +3,7 @@ import os
 import platform
 import requests
 import time
+import sys
 
 
 __version__ = '0.1'
@@ -48,6 +49,11 @@ def SESSION_TIME(stats, info):
     secs = int(duration)
     msecs = int((duration - secs) * 1000)
     info.append(('session_time', '%d.%d' % (secs, msecs)))
+
+
+def PYTHON_VERSION(stats, info):
+    python = ';'.join([str(c) for c in sys.version_info] + [sys.version])
+    info.append(('python', python))
 
 
 def _encode(s):
