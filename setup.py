@@ -6,16 +6,6 @@ from setuptools import setup
 os.chdir(os.path.abspath(os.path.dirname(__file__)))
 
 
-def list_files(d, root):
-    files = []
-    for e in os.listdir(os.path.join(root, d)):
-        if os.path.isdir(os.path.join(root, d, e)):
-            files.extend(list_files('%s/%s' % (d, e), root))
-        elif not e.endswith('.pyc'):
-            files.append('%s/%s' % (d, e))
-    return files
-
-
 with open('README.rst') as fp:
     description = fp.read()
 setup(name='usagestats',
