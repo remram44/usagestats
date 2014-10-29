@@ -178,7 +178,7 @@ class Stats(object):
         if self.user_id:
             all_info.insert(1, ('user', self.user_id))
 
-        logger.info("Generated report:\n%r" % (all_info,))
+        logger.info("Generated report:\n%r", (all_info,))
 
         # Current report
         filename = 'report_%d_%d.txt' % (secs, msecs)
