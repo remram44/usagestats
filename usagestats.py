@@ -72,7 +72,27 @@ def _encode(s):
 
 
 class Stats(object):
-    DISABLED, ENABLED, UNSET = range(3)
+    ERRORED, DISABLED_ENV, DISABLED, UNSET, ENABLED = range(5)
+
+    @property
+    def enabled(self):
+        return self.status in (Stats.UNSET, Stats.ENABLED)
+
+    @property
+    def enableable(self):
+        return self.status is not Stats.ERRORED
+
+    @property
+    def disableable(self):
+        return self.status is not Stats.ERRORED
+
+    @property
+    def recording(self):
+        return self.status in (Stats.UNSET, Stats.ENABLED)
+
+    @property
+    def sending(self):
+        return self.status is Stats.ENABLED
 
     def __init__(self, location, prompt, drop_point,
                  version, unique_user_id=False,
@@ -81,9 +101,9 @@ class Stats(object):
 
         env_var = os.environ.get(env_var, '').lower()
         if env_var not in (None, '', '1', 'on', 'enabled', 'yes', 'true'):
-            self.enabled = Stats.DISABLED
+            self.status = Stats.DISABLED_ENV
         else:
-            self.enabled = Stats.UNSET
+            self.status = Stats.UNSET
         self.location = os.path.expanduser(location)
         self.drop_point = drop_point
         self.version = version
@@ -96,22 +116,22 @@ class Stats(object):
             raise TypeError("'prompt' should either be None, a Prompt or a "
                             "string")
 
-        if not os.path.isdir(self.location):
+        if self.enabled and not os.path.isdir(self.location):
             try:
                 os.makedirs(self.location, 0o700)
             except OSError:
                 logger.warning("Couldn't create %s, usage statistics won't be "
                                "collected", self.location)
-                self.enabled = Stats.DISABLED
+                self.status = Stats.ERRORED
 
         status_file = os.path.join(self.location, 'status')
         if self.enabled and os.path.exists(status_file):
             with open(status_file, 'r') as fp:
                 status = fp.read().strip()
             if status == 'ENABLED':
-                self.enabled = Stats.ENABLED
+                self.status = Stats.ENABLED
             elif status == 'DISABLED':
-                self.enabled = Stats.DISABLED
+                self.status = Stats.DISABLED
 
         if self.enabled and unique_user_id:
             user_id_file = os.path.join(self.location, 'user_id')
@@ -129,24 +149,29 @@ class Stats(object):
         self.notes = []
 
     def enable_reporting(self):
-        if self.enabled is Stats.DISABLED:
+        if not self.enableable:
             logger.critical("Can't enable reporting")
             return
-        elif self.enabled is not Stats.ENABLED:
-            self.enabled = Stats.ENABLED
-            status_file = os.path.join(self.location, 'status')
-            with open(status_file, 'w') as fp:
-                fp.write('ENABLED')
+        self.status = Stats.ENABLED
+        status_file = os.path.join(self.location, 'status')
+        with open(status_file, 'w') as fp:
+            fp.write('ENABLED')
 
     def disable_reporting(self):
-        if self.enabled is Stats.DISABLED:
+        if not self.disableable:
             logger.critical("Can't disable reporting")
             return
-        else:
-            self.enabled = Stats.DISABLED
-            status_file = os.path.join(self.location, 'status')
-            with open(status_file, 'w') as fp:
-                fp.write('DISABLED')
+        self.status = Stats.DISABLED
+        status_file = os.path.join(self.location, 'status')
+        with open(status_file, 'w') as fp:
+            fp.write('DISABLED')
+        if os.path.exists(self.location):
+            old_reports = [f for f in os.listdir(self.location)
+                           if f.startswith('report_')]
+            for old_filename in old_reports:
+                fullname = os.path.join(self.location, old_filename)
+                os.remove(fullname)
+            logger.info("Deleted %d pending reports", len(old_reports))
 
     @staticmethod
     def _to_notes(info):
@@ -158,11 +183,11 @@ class Stats(object):
             return info
 
     def note(self, info):
-        if self.enabled:
+        if self.recording:
             self.notes.extend(self._to_notes(info))
 
     def submit(self, info, *flags):
-        if not self.enabled:
+        if not self.recording:
             return
 
         all_info, self.notes = self.notes, None
@@ -185,6 +210,17 @@ class Stats(object):
         def generator():
             for key, value in all_info:
                 yield _encode(key) + b':' + _encode(value) + b'\n'
+
+        # Save current report and exit, unless user has opted in
+        if not self.sending:
+            fullname = os.path.join(self.location, filename)
+            with open(fullname, 'wb') as fp:
+                for l in generator():
+                    fp.write(l)
+
+            # Show prompt
+            sys.stderr.write(self.prompt.prompt)
+            return
 
         # Post previous reports
         old_reports = [f for f in os.listdir(self.location)
@@ -214,7 +250,3 @@ class Stats(object):
                     fp.write(l)
         else:
             logger.info("Submitted current report")
-
-        # Show prompt
-        if self.enabled is Stats.UNSET:
-            sys.stderr.write(self.prompt)
