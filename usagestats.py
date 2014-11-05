@@ -79,7 +79,7 @@ class Stats(object):
                  env_var='PYTHON_USAGE_STATS'):
         self.started_time = time.time()
 
-        env_var = os.environ.get(env_var).lower()
+        env_var = os.environ.get(env_var, '').lower()
         if env_var not in (None, '', '1', 'on', 'enabled', 'yes', 'true'):
             self.enabled = Stats.DISABLED
         else:

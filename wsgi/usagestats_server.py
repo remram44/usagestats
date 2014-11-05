@@ -47,7 +47,6 @@ def application(environ, start_response):
                                 ('Content-Length', '%d' % len(body))])
         return [body]
 
-
     if environ['REQUEST_METHOD'] != 'POST':
         return send_response('403 Forbidden', "invalid request")
 
