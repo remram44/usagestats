@@ -230,7 +230,8 @@ class Stats(object):
             fullname = os.path.join(self.location, old_filename)
             try:
                 with open(fullname, 'rb') as fp:
-                    requests.post(self.drop_point, data=fp)
+                    r = requests.post(self.drop_point, data=fp)
+                    r.raise_for_status()
             except Exception as e:
                 logger.warning("Couldn't upload %s: %s", old_filename, str(e))
                 break
