@@ -1,6 +1,14 @@
 Changelog
 =========
 
+0.3 (???)
+---------
+
+Bugfixes:
+* Don't fail if PYTHON_USAGE_STATS is not set
+* Major rewrite of the enabled/disabled statuses
+* Keep reports that failed to upload correctly
+
 0.2 (2014-10-28)
 ----------------
 
