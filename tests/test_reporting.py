@@ -34,6 +34,8 @@ def temp_recv_dir(func):
 class TestReporting(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        if 'PYTHON_USAGE_STATS' in os.environ:
+            del os.environ['PYTHON_USAGE_STATS']
         cls._recv_dir = tempfile.mkdtemp(prefix='usagestats_tests_server_')
         cls._wsgi_process = subprocess.Popen(
                 [sys.executable,
