@@ -96,8 +96,11 @@ class Stats(object):
 
     def __init__(self, location, prompt, drop_point,
                  version, unique_user_id=False,
-                 env_var='PYTHON_USAGE_STATS'):
+                 env_var='PYTHON_USAGE_STATS',
+                 ssl_verify=None):
         self.started_time = time.time()
+
+        self.ssl_verify = ssl_verify
 
         env_var = os.environ.get(env_var, '').lower()
         if env_var not in (None, '', '1', 'on', 'enabled', 'yes', 'true'):
@@ -232,7 +235,8 @@ class Stats(object):
                 with open(fullname, 'rb') as fp:
                     # FIXME: ``data=generator()`` would make requests stream,
                     # which is currently not a good idea (WSGI chokes on it)
-                    r = requests.post(self.drop_point, data=fp.read())
+                    r = requests.post(self.drop_point, data=fp.read(),
+                                      verify=self.ssl_verify)
                     r.raise_for_status()
             except Exception as e:
                 logger.warning("Couldn't upload %s: %s", old_filename, str(e))
@@ -245,7 +249,8 @@ class Stats(object):
         try:
             # FIXME: ``data=generator()`` would make requests stream, which is
             # currently not a good idea (WSGI chokes on it)
-            r = requests.post(self.drop_point, data=b''.join(generator()))
+            r = requests.post(self.drop_point, data=b''.join(generator()),
+                              verify=self.ssl_verify)
             r.raise_for_status()
         except requests.RequestException as e:
             logger.warning("Couldn't upload report: %s", str(e))
