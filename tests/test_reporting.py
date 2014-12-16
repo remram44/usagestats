@@ -54,10 +54,16 @@ class TestReporting(unittest.TestCase):
         shutil.rmtree(cls._recv_dir)
 
     @classmethod
-    def _get_reports(cls, tdir):
-        # Give one second to the server to process the request and write a file
-        time.sleep(1)
+    def _get_reports(cls, tdir, expected=0):
+        # Give .5s to the server to process the request and write a file
+        time.sleep(0.5)
         lst = list(os.listdir(cls._recv_dir))
+        # This cheats a little by waiting a bit more (max 5s) if the expected
+        # number of files is not there
+        nb = 1
+        while nb < 10 and len(lst) < expected:
+            time.sleep(0.5)
+            nb += 1
         results = []
         for name in sorted(lst):
             with open(os.path.join(cls._recv_dir, name), 'rb') as fp:
@@ -99,7 +105,7 @@ class TestReporting(unittest.TestCase):
             stats.submit([('what', 'Ran the program'), ('mode', 'yep')],
                          usagestats.PYTHON_VERSION)
 
-        reports = self._get_reports(tdir)
+        reports = self._get_reports(tdir, 2)
         self.assertEqual(len(reports), 2)
 
         with capture_stderr() as lines:
@@ -112,7 +118,7 @@ class TestReporting(unittest.TestCase):
             stats.submit([('what', 'Ran the program'), ('mode', 'again')],
                          usagestats.PYTHON_VERSION)
 
-        reports = self._get_reports(tdir)
+        reports = self._get_reports(tdir, 3)
         self.assertEqual(len(reports), 3)
 
         for report, mode in zip(reports, [b'nope', b'yep', b'again']):
@@ -141,7 +147,7 @@ class TestReporting(unittest.TestCase):
                          usagestats.PYTHON_VERSION)
 
         self.assertEqual(lines, [])
-        reports = self._get_reports(tdir)
+        reports = self._get_reports(tdir, 1)
         self.assertEqual(len(reports), 1)
         report, = reports
         regex_compare(report,
