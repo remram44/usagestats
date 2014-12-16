@@ -64,11 +64,14 @@ def regex_compare(actual, expected, fail=_fail):
     elif not isinstance(actual, (list, tuple)):
         raise TypeError
 
-    for a, e in zip_longest(actual, expected):
-        if e is None:
-            fail("Unexpected line %r" % a)
-        elif a is None:
-            fail("Missing line: expected %r" % a)
-        else:
-            if not re.search(e, a):
-                fail("%r != %r" % (a, e))
+    try:
+        for a, e in zip_longest(actual, expected):
+            if e is None:
+                fail("Unexpected line %r" % a)
+            elif a is None:
+                fail("Missing line: expected %r" % a)
+            else:
+                if not re.search(e, a):
+                    fail("%r != %r" % (a, e))
+    except Exception:
+        print("Tested output: %r" % (actual,))
