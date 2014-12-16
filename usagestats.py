@@ -24,7 +24,7 @@ class Prompt(object):
                 raise TypeError("Expects either 'prompt' or both 'enable' and "
                                 "'disable'")
             self.prompt = (
-                    "Uploading usage statistics is currently {{status}}\n"
+                    "Uploading usage statistics is currently disabled\n"
                     "Please help us by providing anonymous usage statistics; "
                     "you can enable this\nby running:\n"
                     "    {enable}\n"
