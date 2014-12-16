@@ -51,17 +51,13 @@ def application(environ, start_response):
         return send_response('403 Forbidden', "invalid request")
 
     # Gets the posted input
-    request_body = b''
     try:
-        request_body_size = int(environ.get('CONTENT_LENGTH', 0))
-        if request_body_size < MAX_SIZE:
-            request_body = environ['wsgi.input'].read(request_body_size)
-    except ValueError:
-        request_body = environ['wsgi.input'].read(MAX_SIZE)
-        request_body_size = len(request_body)
-
-    if request_body_size >= MAX_SIZE:
+        request_body_size = int(environ['CONTENT_LENGTH'])
+    except (KeyError, ValueError):
+        return send_response('400 Bad Request', "invalid content length")
+    if request_body_size > MAX_SIZE:
         return send_response('403 Forbidden', "report too big")
+    request_body = environ['wsgi.input'].read(request_body_size)
 
     # Tries to store
     response_body = store(request_body, environ.get('REMOTE_ADDR'))
