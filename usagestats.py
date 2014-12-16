@@ -209,10 +209,10 @@ class Stats(object):
         logger.info("Generated report:\n%r", (all_info,))
 
         # Current report
-        filename = 'report_%d_%d.txt' % (secs, msecs)
         def generator():
             for key, value in all_info:
                 yield _encode(key) + b':' + _encode(value) + b'\n'
+        filename = 'report_%d_%d.txt' % (secs, msecs)
 
         # Save current report and exit, unless user has opted in
         if not self.sending:
