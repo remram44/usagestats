@@ -37,6 +37,7 @@ class TestReporting(unittest.TestCase):
         if 'PYTHON_USAGE_STATS' in os.environ:
             del os.environ['PYTHON_USAGE_STATS']
         cls._recv_dir = tempfile.mkdtemp(prefix='usagestats_tests_server_')
+        os.environ['USAGESTATS_SERVER_USE_WERKZEUG'] = 'yes'
         cls._wsgi_process = subprocess.Popen(
                 [sys.executable,
                  os.path.abspath(os.path.join(os.path.dirname(__file__),

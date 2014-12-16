@@ -17,6 +17,6 @@ matrix:
     - python: "2.7"
       env: TEST_MODE=coverage
   exclude:
-    # This is already covered by coverage_py and coverage_c
+    # This is already covered by coverage
     - python: "2.7"
       env: TEST_MODE=run_tests

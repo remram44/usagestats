@@ -14,7 +14,7 @@ in
         ;;
     check_style)
         run_lines<<'EOF'
-        flake8 --ignore=E126 usagestats.py wsgi/usagestats_server.py
+        flake8 --ignore=E126 usagestats.py tests wsgi/usagestats_server.py
 EOF
         ;;
 esac

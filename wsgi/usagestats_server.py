@@ -72,12 +72,18 @@ def application(environ, start_response):
 
 
 if __name__ == '__main__':
-    from twisted.internet import reactor
-    from twisted.web import server
-    from twisted.web.wsgi import WSGIResource
+    use_werkzeug = os.environ.get('USAGESTATS_SERVER_USE_WERKZEUG', 'no')
+    if use_werkzeug.lower() in ('yes', '1', 'y', 'on', 'true'):
+        from werkzeug.serving import run_simple
 
-    resource = WSGIResource(reactor, reactor.getThreadPool(), application)
+        run_simple('localhost', 8000, application)
+    else:
+        from twisted.internet import reactor
+        from twisted.web import server
+        from twisted.web.wsgi import WSGIResource
 
-    site = server.Site(resource)
-    reactor.listenTCP(8000, site)
-    reactor.run()
+        resource = WSGIResource(reactor, reactor.getThreadPool(), application)
+
+        site = server.Site(resource)
+        reactor.listenTCP(8000, site)
+        reactor.run()
