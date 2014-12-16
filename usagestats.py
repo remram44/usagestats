@@ -230,7 +230,9 @@ class Stats(object):
             fullname = os.path.join(self.location, old_filename)
             try:
                 with open(fullname, 'rb') as fp:
-                    r = requests.post(self.drop_point, data=fp)
+                    # FIXME: ``data=generator()`` would make requests stream,
+                    # which is currently not a good idea (WSGI chokes on it)
+                    r = requests.post(self.drop_point, data=fp.read())
                     r.raise_for_status()
             except Exception as e:
                 logger.warning("Couldn't upload %s: %s", old_filename, str(e))
@@ -241,7 +243,9 @@ class Stats(object):
 
         # Post current report
         try:
-            r = requests.post(self.drop_point, data=generator())
+            # FIXME: ``data=generator()`` would make requests stream, which is
+            # currently not a good idea (WSGI chokes on it)
+            r = requests.post(self.drop_point, data=b''.join(generator()))
             r.raise_for_status()
         except requests.RequestException as e:
             logger.warning("Couldn't upload report: %s", str(e))
