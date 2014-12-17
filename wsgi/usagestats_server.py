@@ -4,6 +4,7 @@
 
 import os
 import re
+import time
 
 
 DESTINATION = '.'  # Current directory
@@ -16,19 +17,29 @@ date_format = re.compile(br'^[0-9]{2,12}\.[0-9]{3}$')
 def store(report, address):
     """Stores the report on disk.
     """
+    now = time.time()
+    secs = int(now)
+    msecs = int((now - secs) * 1000)
+    submitted_date = filename = None  # avoids warnings
+    while True:
+        submitted_date = '%d.%d' % (secs, msecs)
+        filename = 'report_%s.txt' % submitted_date
+        filename = os.path.join(DESTINATION, filename)
+        if not os.path.exists(filename):
+            break
+        msecs += 1
+
     lines = [l for l in report.split(b'\n') if l]
     for line in lines:
         if line.startswith(b'date:'):
             date = line[5:]
             if date_format.match(date):
-                filename = 'report_%s.txt' % date.decode('ascii')
-                filename = os.path.join(DESTINATION, filename)
-                if os.path.exists(filename):
-                    return "file exists"
                 with open(filename, 'wb') as fp:
                     if not isinstance(address, bytes):
                         address = address.encode('ascii')
-                    fp.write(b'remote_addr:' + address + b'\n')
+                    fp.write(b'submitted_from:' + address + b'\n')
+                    fp.write(('submitted_date:%s\n' % submitted_date)
+                             .encode('ascii'))
                     fp.write(report)
                 return None
             else:
