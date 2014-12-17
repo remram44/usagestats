@@ -63,17 +63,13 @@ def application(environ, start_response):
         return send_response('403 Forbidden', "invalid request")
 
     # Gets the posted input
-    request_body = b''
     try:
-        request_body_size = int(environ.get('CONTENT_LENGTH', 0))
-        if request_body_size < MAX_SIZE:
-            request_body = environ['wsgi.input'].read(request_body_size)
-    except ValueError:
-        request_body = environ['wsgi.input'].read(MAX_SIZE)
-        request_body_size = len(request_body)
-
-    if request_body_size >= MAX_SIZE:
+        request_body_size = int(environ['CONTENT_LENGTH'])
+    except (KeyError, ValueError):
+        return send_response('400 Bad Request', "invalid content length")
+    if request_body_size > MAX_SIZE:
         return send_response('403 Forbidden', "report too big")
+    request_body = environ['wsgi.input'].read(request_body_size)
 
     # Tries to store
     response_body = store(request_body, environ.get('REMOTE_ADDR'))
@@ -88,12 +84,18 @@ def application(environ, start_response):
 
 
 if __name__ == '__main__':
-    from twisted.internet import reactor
-    from twisted.web import server
-    from twisted.web.wsgi import WSGIResource
+    use_werkzeug = os.environ.get('USAGESTATS_SERVER_USE_WERKZEUG', 'no')
+    if use_werkzeug.lower() in ('yes', '1', 'y', 'on', 'true'):
+        from werkzeug.serving import run_simple
 
-    resource = WSGIResource(reactor, reactor.getThreadPool(), application)
+        run_simple('localhost', 8000, application)
+    else:
+        from twisted.internet import reactor
+        from twisted.web import server
+        from twisted.web.wsgi import WSGIResource
 
-    site = server.Site(resource)
-    reactor.listenTCP(8000, site)
-    reactor.run()
+        resource = WSGIResource(reactor, reactor.getThreadPool(), application)
+
+        site = server.Site(resource)
+        reactor.listenTCP(8000, site)
+        reactor.run()
