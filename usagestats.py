@@ -52,23 +52,27 @@ def SESSION_TIME(stats, info):
 
 
 def PYTHON_VERSION(stats, info):
-    python = ';'.join([str(c) for c in sys.version_info] + [sys.version])
+    # Some versions of Python have a \n in sys.version!
+    version = sys.version.replace(' \n', ' ').replace('\n', ' ')
+    python = ';'.join([str(c) for c in sys.version_info] + [version])
     info.append(('python', python))
 
 
 def _encode(s):
-    if isinstance(s, bytes):
-        return s
-    if str == bytes:  # Python 2
-        if isinstance(s, unicode):
-            return s.encode('utf-8')
-        else:
-            return str(s)
-    else:  # Python 3
-        if isinstance(s, str):
-            return s.encode('utf-8')
-        else:
-            return str(s).encode('utf-8')
+    if not isinstance(s, bytes):
+        if str == bytes:  # Python 2
+            if isinstance(s, unicode):
+                s = s.encode('utf-8')
+            else:
+                s = str(s)
+        else:  # Python 3
+            if isinstance(s, str):
+                s = s.encode('utf-8')
+            else:
+                s = str(s).encode('utf-8')
+    if b'\n' in s:
+        s = s.replace(b'\n', b' ')
+    return s
 
 
 class Stats(object):
