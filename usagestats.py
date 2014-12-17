@@ -236,7 +236,7 @@ class Stats(object):
                     # FIXME: ``data=generator()`` would make requests stream,
                     # which is currently not a good idea (WSGI chokes on it)
                     r = requests.post(self.drop_point, data=fp.read(),
-                                      verify=self.ssl_verify)
+                                      timeout=1, verify=self.ssl_verify)
                     r.raise_for_status()
             except Exception as e:
                 logger.warning("Couldn't upload %s: %s", old_filename, str(e))
@@ -250,7 +250,7 @@ class Stats(object):
             # FIXME: ``data=generator()`` would make requests stream, which is
             # currently not a good idea (WSGI chokes on it)
             r = requests.post(self.drop_point, data=b''.join(generator()),
-                              verify=self.ssl_verify)
+                              timeout=1, verify=self.ssl_verify)
             r.raise_for_status()
         except requests.RequestException as e:
             logger.warning("Couldn't upload report: %s", str(e))
