@@ -6,7 +6,7 @@ import os
 import re
 
 
-DESTINATION = b'.'  # Current directory
+DESTINATION = '.'  # Current directory
 MAX_SIZE = 524288  # 512 KiB
 
 
@@ -21,7 +21,7 @@ def store(report, address):
         if line.startswith(b'date:'):
             date = line[5:]
             if date_format.match(date):
-                filename = b'report_' + date + b'.txt'
+                filename = 'report_%s.txt' % date.decode('ascii')
                 filename = os.path.join(DESTINATION, filename)
                 if os.path.exists(filename):
                     return "file exists"
