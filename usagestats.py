@@ -155,6 +155,8 @@ class Stats(object):
 
         self.notes = []
 
+        self.note([('version', self.version)])
+
     def enable_reporting(self):
         if not self.enableable:
             logger.critical("Can't enable reporting")
