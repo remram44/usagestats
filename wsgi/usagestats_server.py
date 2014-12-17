@@ -22,9 +22,10 @@ def store(report, address):
             date = line[5:]
             if date_format.match(date):
                 filename = b'report_' + date + b'.txt'
+                filename = os.path.join(DESTINATION, filename)
                 if os.path.exists(filename):
                     return "file exists"
-                with open(os.path.join(DESTINATION, filename), 'wb') as fp:
+                with open(filename, 'wb') as fp:
                     if not isinstance(address, bytes):
                         address = address.encode('ascii')
                     fp.write(b'remote_addr:' + address + b'\n')
