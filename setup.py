@@ -9,7 +9,7 @@ os.chdir(os.path.abspath(os.path.dirname(__file__)))
 with open('README.rst') as fp:
     description = fp.read()
 setup(name='usagestats',
-      version='0.2',
+      version='0.3',
       py_modules=['usagestats'],
       description="Anonymous usage statistics collecter",
       install_requires=['requests'],
