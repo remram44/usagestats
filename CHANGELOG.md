@@ -7,7 +7,12 @@ Changelog
 Bugfixes:
 * Don't fail if PYTHON_USAGE_STATS is not set
 * Major rewrite of the enabled/disabled statuses
-* Keep reports that failed to upload correctly
+* Keep reports if we can't connect
+* Reports 'version' argument to Stats
+
+Features:
+* Adds ssl_verify argument, for custom SSL CA
+* Makes submission faster (max 5 reports at a time, 1s timeout)
 
 0.2 (2014-10-28)
 ----------------
