@@ -257,7 +257,6 @@ class Stats(object):
             # currently not a good idea (WSGI chokes on it)
             r = requests.post(self.drop_point, data=b''.join(generator()),
                               timeout=1, verify=self.ssl_verify)
-            r.raise_for_status()
         except requests.RequestException as e:
             logger.warning("Couldn't upload report: %s", str(e))
             fullname = os.path.join(self.location, filename)
@@ -265,4 +264,8 @@ class Stats(object):
                 for l in generator():
                     fp.write(l)
         else:
-            logger.info("Submitted current report")
+            try:
+                r.raise_for_status()
+                logger.info("Submitted current report")
+            except requests.RequestException as e:
+                logger.warning("Server rejected report: %s", str(e))
