@@ -75,3 +75,4 @@ def regex_compare(actual, expected, fail=_fail):
                     fail("%r != %r" % (a, e))
     except Exception:
         print("Tested output: %r" % (actual,))
+        raise
