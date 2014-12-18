@@ -235,6 +235,7 @@ class Stats(object):
         old_reports = [f for f in os.listdir(self.location)
                        if f.startswith('report_')]
         old_reports.sort()
+        old_reports = old_reports[:4]  # Only upload 5 at a time
         for old_filename in old_reports:
             fullname = os.path.join(self.location, old_filename)
             try:
