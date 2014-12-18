@@ -11,7 +11,7 @@ DESTINATION = '.'  # Current directory
 MAX_SIZE = 524288  # 512 KiB
 
 
-date_format = re.compile(br'^[0-9]{2,12}\.[0-9]{3}$')
+date_format = re.compile(br'^[0-9]{2,12}\.[0-9]{1,3}$')
 
 
 def store(report, address):
