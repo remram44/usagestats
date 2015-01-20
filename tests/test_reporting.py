@@ -84,6 +84,7 @@ class TestReporting(unittest.TestCase):
                          usagestats.PYTHON_VERSION)
 
         self.assertEqual(lines, [
+                b"",
                 b"Uploading usage statistics is currently disabled",
                 b"Please help us by providing anonymous usage statistics; "
                 b"you can enable this", b"by running:",
@@ -123,9 +124,11 @@ class TestReporting(unittest.TestCase):
 
         for report, mode in zip(reports, [b'nope', b'yep', b'again']):
             regex_compare(report,
-                          [br'^remote_addr:127.0.0.1$',
+                          [br'^submitted_from:127.0.0.1$',
+                           br'^submitted_date:',
                            br'^date:',
                            br'^user:',
+                           br'^version:1\.0$',
                            br'^mode:compatibility$',
                            br'^what:Ran the program$',
                            br'^mode:' + mode + br'$',
@@ -151,9 +154,11 @@ class TestReporting(unittest.TestCase):
         self.assertEqual(len(reports), 1)
         report, = reports
         regex_compare(report,
-                      [br'^remote_addr:127.0.0.1$',
+                      [br'^submitted_from:127.0.0.1$',
+                       br'^submitted_date:',
                        br'^date:',
                        br'^user:',
+                       br'^version:1\.0$',
                        br'^mode:compatibility$',
                        br'^what:Ran the program$',
                        br'^mode:yep$',
