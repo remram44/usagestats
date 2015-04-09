@@ -1,4 +1,5 @@
 language: python
+sudo: false
 env:
   - TEST_MODE=run_tests
 python:
