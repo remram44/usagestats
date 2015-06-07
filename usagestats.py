@@ -192,11 +192,16 @@ class Stats(object):
 
     def note(self, info):
         if self.recording:
+            if self.notes is None:
+                raise ValueError("This report has already been submitted")
             self.notes.extend(self._to_notes(info))
 
     def submit(self, info, *flags):
         if not self.recording:
             return
+
+        if self.notes is None:
+            raise ValueError("This report has already been submitted")
 
         all_info, self.notes = self.notes, None
         all_info.extend(self._to_notes(info))
