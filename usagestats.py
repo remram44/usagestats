@@ -115,13 +115,12 @@ class Stats(object):
         self.drop_point = drop_point
         self.version = version
 
-        if prompt is None or isinstance(prompt, Prompt):
+        if isinstance(prompt, Prompt):
             self.prompt = prompt
         elif isinstance(prompt, basestring):
             self.prompt = Prompt(prompt)
         else:
-            raise TypeError("'prompt' should either be None, a Prompt or a "
-                            "string")
+            raise TypeError("'prompt' should either a Prompt or a string")
 
         if self.enabled and not os.path.isdir(self.location):
             try:
