@@ -10,7 +10,7 @@ in
         python setup.py install
         ;;
     coverage)
-        pip install coveralls
+        pip install coverage codecov
         pip install werkzeug
         python setup.py install
         ;;
