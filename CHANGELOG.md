@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.4 (2015-07-07)
+----------------
+
+Bugfixes:
+* Correctly handle prompt=None
+* Explicit ValueError if reusing already-submitted report
+
 0.3 (2014-12-18)
 ----------------
 
