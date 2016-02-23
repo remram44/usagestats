@@ -13,6 +13,8 @@ logger = logging.getLogger('usagestats')
 
 
 class Prompt(object):
+    """The reporting prompt, asking the user to enable or disable the system.
+    """
     def __init__(self, prompt=None, enable=None, disable=None):
         if prompt is not None:
             if enable is not None or disable is not None:
@@ -37,6 +39,10 @@ class Prompt(object):
 
 
 def OPERATING_SYSTEM(stats, info):
+    """General information about the operating system.
+
+    This is a flag you can pass to `Stats.submit()`.
+    """
     info.append(('architecture', platform.machine().lower()))
     info.append(('distribution',
                  "%s;%s" % (platform.linux_distribution()[0:2])))
@@ -45,6 +51,13 @@ def OPERATING_SYSTEM(stats, info):
 
 
 def SESSION_TIME(stats, info):
+    """Total time of this session.
+
+    Reports the time elapsed from the construction of the `Stats` object to
+    this `submit()` call.
+
+    This is a flag you can pass to `Stats.submit()`.
+    """
     duration = time.time() - stats.started_time
     secs = int(duration)
     msecs = int((duration - secs) * 1000)
@@ -52,6 +65,10 @@ def SESSION_TIME(stats, info):
 
 
 def PYTHON_VERSION(stats, info):
+    """Python interpreter version.
+
+    This is a flag you can pass to `Stats.submit()`.
+    """
     # Some versions of Python have a \n in sys.version!
     version = sys.version.replace(' \n', ' ').replace('\n', ' ')
     python = ';'.join([str(c) for c in sys.version_info] + [version])
@@ -76,6 +93,13 @@ def _encode(s):
 
 
 class Stats(object):
+    """Usage statistics collection and reporting.
+
+    Create an object of this class when your application starts, collect
+    information using `note()` from all around your codebase, then call
+    `submit()` to generate a report and upload it to your drop point for
+    analysis.
+    """
     ERRORED, DISABLED_ENV, DISABLED, UNSET, ENABLED = range(5)
 
     @property
@@ -102,6 +126,12 @@ class Stats(object):
                  version, unique_user_id=False,
                  env_var='PYTHON_USAGE_STATS',
                  ssl_verify=None):
+        """Start a report for later submission.
+
+        This creates a report object that you can fill with data using
+        `note()`, until you finally upload it (or not, depending on
+        configuration) using `submit()`.
+        """
         self.started_time = time.time()
 
         self.ssl_verify = ssl_verify
@@ -157,6 +187,12 @@ class Stats(object):
         self.note([('version', self.version)])
 
     def enable_reporting(self):
+        """Call this method to explicitly enable reporting.
+
+        The current report will be uploaded, plus the previously recorded ones,
+        and the configuration will be updated so that future runs also upload
+        automatically.
+        """
         if not self.enableable:
             logger.critical("Can't enable reporting")
             return
@@ -166,6 +202,12 @@ class Stats(object):
             fp.write('ENABLED')
 
     def disable_reporting(self):
+        """Call this method to explicitly disable reporting.
+
+        The current report will be discarded, along with the previously
+        recorded ones that haven't been uploaded. The configuration is updated
+        so that future runs do not record or upload reports.
+        """
         if not self.disableable:
             logger.critical("Can't disable reporting")
             return
@@ -191,12 +233,25 @@ class Stats(object):
             return info
 
     def note(self, info):
+        """Record some info to the report.
+
+        :param info: Dictionary of info to record. Note that previous info
+        recorded under the same keys will not be overwritten.
+        """
         if self.recording:
             if self.notes is None:
                 raise ValueError("This report has already been submitted")
             self.notes.extend(self._to_notes(info))
 
     def submit(self, info, *flags):
+        """Finish recording and upload or save the report.
+
+        This closes the `Stats` object, no further methods should be called.
+        The report is either saved, uploaded or discarded, depending on
+        configuration. If uploading is enabled, previous reports might be
+        uploaded too. If uploading is not explicitly enabled or disabled, the
+        prompt will be shown, to ask the user to enable or disable it.
+        """
         if not self.recording:
             return
 
