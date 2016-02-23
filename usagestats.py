@@ -152,22 +152,7 @@ class Stats(object):
         else:
             raise TypeError("'prompt' should either a Prompt or a string")
 
-        if self.enabled and not os.path.isdir(self.location):
-            try:
-                os.makedirs(self.location, 0o700)
-            except OSError:
-                logger.warning("Couldn't create %s, usage statistics won't be "
-                               "collected", self.location)
-                self.status = Stats.ERRORED
-
-        status_file = os.path.join(self.location, 'status')
-        if self.enabled and os.path.exists(status_file):
-            with open(status_file, 'r') as fp:
-                status = fp.read().strip()
-            if status == 'ENABLED':
-                self.status = Stats.ENABLED
-            elif status == 'DISABLED':
-                self.status = Stats.DISABLED
+        self.read_config()
 
         if self.enabled and unique_user_id:
             user_id_file = os.path.join(self.location, 'user_id')
@@ -186,6 +171,62 @@ class Stats(object):
 
         self.note([('version', self.version)])
 
+    def read_config(self):
+        """Reads the configuration.
+
+        This method can be overloaded to integrate with your application's own
+        configuration mechanism. By default, a single 'status' file is read
+        from the reports' directory.
+
+        This should set `self.status` to one of the state constants, and make
+        sure `self.location` points to a writable directory where the reports
+        will be written.
+
+        The possible values for `self.status` are:
+
+        - `UNSET`: nothing has been selected and the user should be prompted
+        - `ENABLED`: collect and upload reports
+        - `DISABLED`: don't collect or upload anything, stop prompting
+        - `ERRORED`: something is broken, and we can't do anything in this
+          session (for example, the configuration directory is not writable)
+        """
+        if self.enabled and not os.path.isdir(self.location):
+            try:
+                os.makedirs(self.location, 0o700)
+            except OSError:
+                logger.warning("Couldn't create %s, usage statistics won't be "
+                               "collected", self.location)
+                self.status = Stats.ERRORED
+
+        status_file = os.path.join(self.location, 'status')
+        if self.enabled and os.path.exists(status_file):
+            with open(status_file, 'r') as fp:
+                status = fp.read().strip()
+            if status == 'ENABLED':
+                self.status = Stats.ENABLED
+            elif status == 'DISABLED':
+                self.status = Stats.DISABLED
+
+    def write_config(self, enabled):
+        """Writes the configuration.
+
+        This method can be overloaded to integrate with your application's own
+        configuration mechanism. By default, a single 'status' file is written
+        in the reports' directory, containing either ``ENABLED`` or
+        ``DISABLED``; if the file doesn't exist, `UNSET` is assumed.
+
+        :param enabled: Either `Stats.UNSET`, `Stats.DISABLED` or
+        `Stats.ENABLED`.
+        """
+        status_file = os.path.join(self.location, 'status')
+        with open(status_file, 'w') as fp:
+            if enabled is Stats.ENABLED:
+                fp.write('ENABLED')
+            elif enabled is Stats.DISABLED:
+                fp.write('DISABLED')
+            else:
+                raise ValueError("Unknown reporting state %r" % enabled)
+
     def enable_reporting(self):
         """Call this method to explicitly enable reporting.
 
@@ -197,9 +238,7 @@ class Stats(object):
             logger.critical("Can't enable reporting")
             return
         self.status = Stats.ENABLED
-        status_file = os.path.join(self.location, 'status')
-        with open(status_file, 'w') as fp:
-            fp.write('ENABLED')
+        self.write_config(self.status)
 
     def disable_reporting(self):
         """Call this method to explicitly disable reporting.
@@ -212,9 +251,7 @@ class Stats(object):
             logger.critical("Can't disable reporting")
             return
         self.status = Stats.DISABLED
-        status_file = os.path.join(self.location, 'status')
-        with open(status_file, 'w') as fp:
-            fp.write('DISABLED')
+        self.write_config(self.status)
         if os.path.exists(self.location):
             old_reports = [f for f in os.listdir(self.location)
                            if f.startswith('report_')]
