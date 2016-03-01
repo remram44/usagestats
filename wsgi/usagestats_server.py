@@ -22,7 +22,7 @@ def store(report, address):
     msecs = int((now - secs) * 1000)
     submitted_date = filename = None  # avoids warnings
     while True:
-        submitted_date = '%d.%d' % (secs, msecs)
+        submitted_date = '%d.%03d' % (secs, msecs)
         filename = 'report_%s.txt' % submitted_date
         filename = os.path.join(DESTINATION, filename)
         if not os.path.exists(filename):
