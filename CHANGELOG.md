@@ -8,6 +8,9 @@ Bugfixes:
 * Correctly handle prompt=None
 * Explicit ValueError if reusing already-submitted report
 
+Features:
+* Introduce `read_config()` and `write_config()` methods for overloading with your app's specific config system
+
 0.3 (2014-12-18)
 ----------------
 
