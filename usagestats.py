@@ -108,11 +108,11 @@ class Stats(object):
 
     @property
     def enableable(self):
-        return self.status is not Stats.ERRORED
+        return self.status not in (Stats.ERRORED, Stats.ENABLED)
 
     @property
     def disableable(self):
-        return self.status is not Stats.ERRORED
+        return self.status not in (Stats.ERRORED, Stats.DISABLED)
 
     @property
     def recording(self):
@@ -234,6 +234,8 @@ class Stats(object):
         and the configuration will be updated so that future runs also upload
         automatically.
         """
+        if self.status == Stats.ENABLED:
+            return
         if not self.enableable:
             logger.critical("Can't enable reporting")
             return
@@ -247,6 +249,8 @@ class Stats(object):
         recorded ones that haven't been uploaded. The configuration is updated
         so that future runs do not record or upload reports.
         """
+        if self.status == Stats.DISABLED:
+            return
         if not self.disableable:
             logger.critical("Can't disable reporting")
             return
