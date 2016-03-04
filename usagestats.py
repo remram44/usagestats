@@ -125,22 +125,18 @@ class Stats(object):
     def __init__(self, location, prompt, drop_point,
                  version, unique_user_id=False,
                  env_var='PYTHON_USAGE_STATS',
-                 ssl_verify=None):
+                 ssl_verify=None,
+                 initialize=True):
         """Start a report for later submission.
 
         This creates a report object that you can fill with data using
         `note()`, until you finally upload it (or not, depending on
         configuration) using `submit()`.
         """
+        self.initialized = False
         self.started_time = time.time()
 
         self.ssl_verify = ssl_verify
-
-        env_var = os.environ.get(env_var, '').lower()
-        if env_var not in (None, '', '1', 'on', 'enabled', 'yes', 'true'):
-            self.status = Stats.DISABLED_ENV
-        else:
-            self.status = Stats.UNSET
         self.location = os.path.expanduser(location)
         self.drop_point = drop_point
         self.version = version
@@ -151,6 +147,32 @@ class Stats(object):
             self.prompt = Prompt(prompt)
         else:
             raise TypeError("'prompt' should either a Prompt or a string")
+
+        self.notes = []
+
+        self.note([('version', self.version)])
+
+        if initialize:
+            self.initialize()
+
+    def initialize(self):
+        """Load config, choose whether we are enabled, and get unique user id.
+
+        This is usually done on construction, but can be delayed by passing
+        ``initialize=False``, for example if you overloaded `read_config()` but
+        the configuration is not available initially (but you still want to
+        take notes before you actually load the configuration).
+
+        It will also get called automatically before `submit()`.
+        """
+        if self.initialized:
+            return
+
+        env_var = os.environ.get(env_var, '').lower()
+        if env_var not in (None, '', '1', 'on', 'enabled', 'yes', 'true'):
+            self.status = Stats.DISABLED_ENV
+        else:
+            self.status = Stats.UNSET
 
         self.read_config()
 
@@ -167,9 +189,7 @@ class Stats(object):
         else:
             self.user_id = None
 
-        self.notes = []
-
-        self.note([('version', self.version)])
+        self.initialized = True
 
     def read_config(self):
         """Reads the configuration.
@@ -289,6 +309,9 @@ class Stats(object):
         uploaded too. If uploading is not explicitly enabled or disabled, the
         prompt will be shown, to ask the user to enable or disable it.
         """
+        if not self.initialized:
+            self.initialize()
+
         if not self.recording:
             return
 
