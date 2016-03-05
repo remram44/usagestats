@@ -1,15 +1,22 @@
 Changelog
 =========
 
+0.5 (2016-03-04)
+----------------
+
+Bugfixes:
+* Always use 3 digits for milliseconds in WSGI server (makes sure they are in order)
+
+Features:
+* Introduce `read_config()` and `write_config()` methods for overloading with your app's specific config system
+* `enableable` and `disableable` now can be used to set status of buttons in an interface
+
 0.4 (2015-07-07)
 ----------------
 
 Bugfixes:
 * Correctly handle prompt=None
 * Explicit ValueError if reusing already-submitted report
-
-Features:
-* Introduce `read_config()` and `write_config()` methods for overloading with your app's specific config system
 
 0.3 (2014-12-18)
 ----------------
