@@ -136,8 +136,9 @@ class Stats(object):
 
         self.ssl_verify = ssl_verify
 
-        env_var = os.environ.get(env_var, '').lower()
-        if env_var not in (None, '', '1', 'on', 'enabled', 'yes', 'true'):
+        self.env_var = env_var
+        env_val = os.environ.get(env_var, '').lower()
+        if env_val not in (None, '', '1', 'on', 'enabled', 'yes', 'true'):
             self.status = Stats.DISABLED_ENV
         else:
             self.status = Stats.UNSET
@@ -294,6 +295,11 @@ class Stats(object):
         prompt will be shown, to ask the user to enable or disable it.
         """
         if not self.recording:
+            return
+        env_val = os.environ.get(self.env_var, '').lower()
+        if env_val not in (None, '', '1', 'on', 'enabled', 'yes', 'true'):
+            self.status = Stats.DISABLED_ENV
+            self.notes = None
             return
 
         if self.notes is None:
