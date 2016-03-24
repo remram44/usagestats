@@ -171,7 +171,7 @@ class Stats(object):
         self.notes = []
         self.unique_notes = {}
 
-        self.unique(version=self.version)
+        self.append(version=self.version)
 
     def read_config(self):
         """Reads the configuration.
