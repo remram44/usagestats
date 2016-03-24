@@ -92,7 +92,127 @@ def _encode(s):
     return s
 
 
-class Stats(object):
+class Recorder(object):
+    """Recording part of the stats.
+
+    This is shared between the root :class:`~usagestats.Stats` class and
+    :class:`~usagestats.Nested` returned by :meth:`~usagestats.Stats.nested()`.
+    """
+    recording = True
+
+    def __init__(self):
+        self.notes = []
+        self.unique_notes = {}
+
+    @staticmethod
+    def _to_notes(info):
+        if hasattr(info, 'iteritems'):
+            return info.iteritems()
+        elif hasattr(info, 'items'):
+            return info.items()
+        else:
+            return info
+
+    def append(self, *lines, **kwargs):
+        """Append notes to the report.
+
+        Notes are associated with a key, however multiple notes can be recorded
+        with the same key. For unique info that should be replaced in the
+        report during execution, use :meth:`~usagestats.Stats.unique()`
+        instead.
+
+        Example::
+
+            stats.append(('button_clicked', "Update"),
+                         ('url_opened', "https://github.com/"))
+            stats.append(parsed_file='html')
+        """
+        if self.recording:
+            if self.notes is None:
+                raise ValueError("This report has already been submitted")
+            self.notes.extend(lines)
+            self.notes.extend(self._to_notes(kwargs))
+
+    def unique(self, **unique_info):
+        """Add or replace some "unique" notes to the report.
+
+        Unique notes are replaced every time, only the last value recorded will
+        be in the final report.
+
+        This is useful for instance to record whether something is used, a
+        total or final value, etc.
+        """
+        self.unique_notes.update(unique_info)
+
+    def nested(self, name, flags):
+        """Create a nested report, useful to record notes on long-going events.
+
+        That nested report can be started and recorded multiple times; there is
+        no need to re-create it by calling `nested()` again.
+
+        Example::
+
+            foo_report = stast.nested('foo',
+                                      [usagestats.SESSION_TIME])
+
+            def foo(arg):
+                foo_report.start(arg=arg)
+                foo_report.unique(found_prime=False)
+                for i in range(0, 100, arg):
+                    foo_report.append(tried=i)
+                    if isprime(i):
+                        foo_report.unique(found_prime=True)
+                foo_report.done()
+        """
+        return Nested(self, name, flags)
+
+    def note(self, info):
+        """Append notes from a dictionary.
+
+        :param info: Dictionary of info to record. Note that previous info
+        recorded under the same keys will not be overwritten.
+
+        ..  deprecated:: 0.6
+        Use :meth:`~usagestats.Stats.unique()` or
+        :meth:`~usagestats.Stats.append()` instead.
+        """
+        if self.recording:
+            if self.notes is None:
+                raise ValueError("This report has already been submitted")
+            self.notes.extend(self._to_notes(info))
+
+
+class Nested(Recorder):
+    @property
+    def recording(self):
+        return self.parent.recording
+
+    def __init__(self, parent, name, flags):
+        Recorder.__init__(self)
+        self.parent = parent
+        self.name = name
+        self.flags = flags
+
+    def start(self, *lines, **kwargs):
+        self.notes = []
+        self.unique_notes = {}
+
+        if self.recording:
+            self.notes.extend(lines)
+            self.notes.extend(self._to_notes(kwargs))
+
+    def done(self):
+        if self.recording:
+            for k, v in self.notes:
+                self.parent.notes.append(('%s.%s' % (self.name, k), v))
+            for k, v in self.unique_notes.items():
+                self.parent.notes.append(('%s.%s' % (self.name, k), v))
+
+        self.notes = []
+        self.unique_notes = {}
+
+
+class Stats(Recorder):
     """Usage statistics collection and reporting.
 
     Create an object of this class when your application starts, collect
@@ -132,6 +252,8 @@ class Stats(object):
         `note()`, until you finally upload it (or not, depending on
         configuration) using `submit()`.
         """
+        Recorder.__init__(self)
+
         self.started_time = time.time()
 
         self.ssl_verify = ssl_verify
@@ -167,9 +289,6 @@ class Stats(object):
                     fp.write(self.user_id)
         else:
             self.user_id = None
-
-        self.notes = []
-        self.unique_notes = {}
 
         self.append(version=self.version)
 
@@ -265,61 +384,6 @@ class Stats(object):
                 fullname = os.path.join(self.location, old_filename)
                 os.remove(fullname)
             logger.info("Deleted %d pending reports", len(old_reports))
-
-    @staticmethod
-    def _to_notes(info):
-        if hasattr(info, 'iteritems'):
-            return info.iteritems()
-        elif hasattr(info, 'items'):
-            return info.items()
-        else:
-            return info
-
-    def append(self, *lines, **kwargs):
-        """Append notes to the report.
-
-        Notes are associated with a key, however multiple notes can be recorded
-        with the same key. For unique info that should be replaced in the
-        report during execution, use :meth:`~usagestats.Stats.unique()`
-        instead.
-
-        Example::
-
-            stats.append(('button_clicked', "Update"),
-                         ('url_opened', "https://github.com/"))
-            stats.append(parsed_file='html')
-        """
-        if self.recording:
-            if self.notes is None:
-                raise ValueError("This report has already been submitted")
-            self.notes.extend(lines)
-            self.notes.extend(self._to_notes(kwargs))
-
-    def unique(self, **unique_info):
-        """Add or replace some "unique" notes to the report.
-
-        Unique notes are replaced every time, only the last value recorded will
-        be in the final report.
-
-        This is useful for instance to record whether something is used, a
-        total or final value, etc.
-        """
-        self.unique_notes.update(unique_info)
-
-    def note(self, info):
-        """Append notes from a dictionary.
-
-        :param info: Dictionary of info to record. Note that previous info
-        recorded under the same keys will not be overwritten.
-
-        ..  deprecated:: 0.6
-        Use :meth:`~usagestats.Stats.unique()` or
-        :meth:`~usagestats.Stats.append()` instead.
-        """
-        if self.recording:
-            if self.notes is None:
-                raise ValueError("This report has already been submitted")
-            self.notes.extend(self._to_notes(info))
 
     def submit(self, *flags):
         """Finish recording and upload or save the report.
