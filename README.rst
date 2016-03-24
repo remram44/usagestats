@@ -32,6 +32,11 @@ your project's requirements and using the library. Here is an example::
                              version='0.1')
 
 
+    def greet(name):
+        print("Hello, {0}!".format(name))
+        stats.append(called_greet=name)
+
+
     def main():
         if len(sys.argv) < 2:
             pass
@@ -44,7 +49,9 @@ your project's requirements and using the library. Here is an example::
 
         if sys.version_info < (3,):
             # Stores some info, will be reported when submit() is called
-            stats.note({'mode': 'compatibility'})
+            stats.unique(mode='compatibility')
+
+        greet("User")
 
         # Report things
         stats.submit(
