@@ -169,6 +169,7 @@ class Stats(object):
             self.user_id = None
 
         self.notes = []
+        self.unique_notes = {}
 
         self.note([('version', self.version)])
 
@@ -274,18 +275,51 @@ class Stats(object):
         else:
             return info
 
+    def append(self, *lines, **kwargs):
+        """Append notes to the report.
+
+        Notes are associated with a key, however multiple notes can be recorded
+        with the same key. For unique info that should be replaced in the
+        report during execution, use :meth:`unique()` instead.
+
+        Example::
+
+            stats.append(('button_clicked', "Update"),
+                         ('url_opened', "https://github.com/"))
+            stats.append
+        """
+        if self.recording:
+            if self.notes is None:
+                raise ValueError("This report has already been submitted")
+            self.notes.extend(lines)
+            self.notes.extend(self._to_notes(kwargs))
+
+    def unique(self, **unique_info):
+        """Add or replace some "unique" notes to the report.
+
+        Unique notes are replaced every time, only the last value recorded will
+        be in the final report.
+
+        This is useful for instance to record whether something is used, a
+        total or final value, etc.
+        """
+        self.unique_notes.update(unique_info)
+
     def note(self, info):
-        """Record some info to the report.
+        """Append notes from a dictionary.
 
         :param info: Dictionary of info to record. Note that previous info
         recorded under the same keys will not be overwritten.
+
+        ..  deprecated:: 0.6
+        Use :meth:`unique()` or :meth:`append()` instead.
         """
         if self.recording:
             if self.notes is None:
                 raise ValueError("This report has already been submitted")
             self.notes.extend(self._to_notes(info))
 
-    def submit(self, info, *flags):
+    def submit(self, append, *flags):
         """Finish recording and upload or save the report.
 
         This closes the `Stats` object, no further methods should be called.
@@ -306,7 +340,7 @@ class Stats(object):
             raise ValueError("This report has already been submitted")
 
         all_info, self.notes = self.notes, None
-        all_info.extend(self._to_notes(info))
+        all_info.extend(self._to_notes(append))
         for flag in flags:
             flag(self, all_info)
 
