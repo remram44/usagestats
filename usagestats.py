@@ -171,7 +171,7 @@ class Stats(object):
         self.notes = []
         self.unique_notes = {}
 
-        self.note([('version', self.version)])
+        self.unique(version=self.version)
 
     def read_config(self):
         """Reads the configuration.
@@ -280,13 +280,14 @@ class Stats(object):
 
         Notes are associated with a key, however multiple notes can be recorded
         with the same key. For unique info that should be replaced in the
-        report during execution, use :meth:`unique()` instead.
+        report during execution, use :meth:`~usagestats.Stats.unique()`
+        instead.
 
         Example::
 
             stats.append(('button_clicked', "Update"),
                          ('url_opened', "https://github.com/"))
-            stats.append
+            stats.append(parsed_file='html')
         """
         if self.recording:
             if self.notes is None:
@@ -312,14 +313,15 @@ class Stats(object):
         recorded under the same keys will not be overwritten.
 
         ..  deprecated:: 0.6
-        Use :meth:`unique()` or :meth:`append()` instead.
+        Use :meth:`~usagestats.Stats.unique()` or
+        :meth:`~usagestats.Stats.append()` instead.
         """
         if self.recording:
             if self.notes is None:
                 raise ValueError("This report has already been submitted")
             self.notes.extend(self._to_notes(info))
 
-    def submit(self, append, *flags):
+    def submit(self, *flags):
         """Finish recording and upload or save the report.
 
         This closes the `Stats` object, no further methods should be called.
@@ -339,8 +341,15 @@ class Stats(object):
         if self.notes is None:
             raise ValueError("This report has already been submitted")
 
+        # Notes
         all_info, self.notes = self.notes, None
-        all_info.extend(self._to_notes(append))
+        # Add arguments
+        if len(flags) >= 1 and not callable(flags[0]):
+            append, flags = flags[0], flags[1:]
+            all_info.extend(self._to_notes(append))
+        # Add unique notes
+        all_info.extend(self.unique_notes.items())
+        # Do callbacks
         for flag in flags:
             flag(self, all_info)
 
