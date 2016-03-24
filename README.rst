@@ -12,7 +12,9 @@ Usage
 -----
 
 You can easily collect information from your program by adding usagestats to
-your project's requirements and using the library. Here is an example::
+your project's requirements and using the library. Here is an example:
+
+..  code-block:: python
 
     import usagestats
     import sys
