@@ -96,7 +96,8 @@ class Recorder(object):
     """Recording part of the stats.
 
     This is shared between the root :class:`~usagestats.Stats` class and
-    :class:`~usagestats.Nested` returned by :meth:`~usagestats.Stats.nested()`.
+    :class:`~usagestats.Nested` returned by
+    :meth:`~usagestats.Recorder.nested()`.
     """
     recording = True
 
@@ -118,7 +119,7 @@ class Recorder(object):
 
         Notes are associated with a key, however multiple notes can be recorded
         with the same key. For unique info that should be replaced in the
-        report during execution, use :meth:`~usagestats.Stats.unique()`
+        report during execution, use :meth:`~usagestats.Recorder.unique()`
         instead.
 
         Example::
@@ -152,7 +153,7 @@ class Recorder(object):
 
         Example::
 
-            foo_report = stast.nested('foo',
+            foo_report = stats.nested('foo',
                                       [usagestats.SESSION_TIME])
 
             def foo(arg):
@@ -173,8 +174,8 @@ class Recorder(object):
         recorded under the same keys will not be overwritten.
 
         ..  deprecated:: 0.6
-        Use :meth:`~usagestats.Stats.unique()` or
-        :meth:`~usagestats.Stats.append()` instead.
+        Use :meth:`~usagestats.Recorder.unique()` or
+        :meth:`~usagestats.Recorder.append()` instead.
         """
         if self.recording:
             if self.notes is None:
