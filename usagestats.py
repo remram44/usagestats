@@ -346,8 +346,8 @@ class Stats(object):
             fullname = os.path.join(self.location, old_filename)
             try:
                 with open(fullname, 'rb') as fp:
-                    # FIXME: ``data=generator()`` would make requests stream,
-                    # which is currently not a good idea (WSGI chokes on it)
+                    # `data=f` would make requests stream, which is currently
+                    # not a good idea (WSGI chokes on it)
                     r = requests.post(self.drop_point, data=fp.read(),
                                       timeout=1, verify=self.ssl_verify)
                     r.raise_for_status()
@@ -360,8 +360,8 @@ class Stats(object):
 
         # Post current report
         try:
-            # FIXME: ``data=generator()`` would make requests stream, which is
-            # currently not a good idea (WSGI chokes on it)
+            # `data=generator()` would make requests stream, which is currently
+            # not a good idea (WSGI chokes on it)
             r = requests.post(self.drop_point, data=b''.join(generator()),
                               timeout=1, verify=self.ssl_verify)
         except requests.RequestException as e:
