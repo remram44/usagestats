@@ -130,9 +130,10 @@ class Recorder(object):
         """
         if self.recording:
             if self.notes is None:
-                raise ValueError("This report has already been submitted")
-            self.notes.extend(lines)
-            self.notes.extend(self._to_notes(kwargs))
+                logger.warning("Can't record, report has been submitted!")
+            else:
+                self.notes.extend(lines)
+                self.notes.extend(self._to_notes(kwargs))
 
     def unique(self, **unique_info):
         """Add or replace some "unique" notes to the report.
@@ -143,7 +144,10 @@ class Recorder(object):
         This is useful for instance to record whether something is used, a
         total or final value, etc.
         """
-        self.unique_notes.update(unique_info)
+        if self.unique_notes is None:
+            logger.warning("Can't record, report has been submitted!")
+        else:
+            self.unique_notes.update(unique_info)
 
     def nested(self, name, flags):
         """Create a nested report, useful to record notes on long-going events.
@@ -179,8 +183,9 @@ class Recorder(object):
         """
         if self.recording:
             if self.notes is None:
-                raise ValueError("This report has already been submitted")
-            self.notes.extend(self._to_notes(info))
+                logger.warning("Can't record, report has been submitted!")
+            else:
+                self.notes.extend(self._to_notes(info))
 
 
 class Nested(Recorder):
@@ -204,13 +209,15 @@ class Nested(Recorder):
 
     def done(self):
         if self.recording:
-            for k, v in self.notes:
-                self.parent.notes.append(('%s.%s' % (self.name, k), v))
-            for k, v in self.unique_notes.items():
-                self.parent.notes.append(('%s.%s' % (self.name, k), v))
-
-        self.notes = []
-        self.unique_notes = {}
+            if self.notes is None or self.parent.notes is None:
+                logger.warning("Can't record, report has been submitted!")
+            else:
+                for k, v in self.notes:
+                    self.parent.notes.append(('%s.%s' % (self.name, k), v))
+                for k, v in self.unique_notes.items():
+                    self.parent.notes.append(('%s.%s' % (self.name, k), v))
+                self.notes = []
+                self.unique_notes = {}
 
 
 class Stats(Recorder):
@@ -404,7 +411,8 @@ class Stats(Recorder):
             return
 
         if self.notes is None:
-            raise ValueError("This report has already been submitted")
+            logger.warning("Can't submit, report has already been submitted!")
+            return
 
         # Notes
         all_info, self.notes = self.notes, None
