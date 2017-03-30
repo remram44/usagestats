@@ -5,7 +5,7 @@ This package is meant to easily get usage statistics from the users of your
 program.
 
 Statistics will be collected but won't be uploaded until the user opts in. A
-message will be printed on stderr asking the user to explicitely opt in or opt
+message will be printed on stderr asking the user to explicitly opt in or opt
 out.
 
 Usage
