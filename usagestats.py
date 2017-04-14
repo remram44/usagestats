@@ -318,7 +318,7 @@ class Stats(object):
         if self.user_id:
             all_info.insert(1, ('user', self.user_id))
 
-        logger.info("Generated report:\n%r", (all_info,))
+        logger.debug("Generated report:\n%r", (all_info,))
 
         # Current report
         def generator():
@@ -355,7 +355,7 @@ class Stats(object):
                 logger.warning("Couldn't upload %s: %s", old_filename, str(e))
                 break
             else:
-                logger.info("Submitted %s", old_filename)
+                logger.info("Submitted report %s", old_filename)
                 os.remove(fullname)
 
         # Post current report
@@ -373,6 +373,6 @@ class Stats(object):
         else:
             try:
                 r.raise_for_status()
-                logger.info("Submitted current report")
+                logger.info("Submitted report")
             except requests.RequestException as e:
                 logger.warning("Server rejected report: %s", str(e))
