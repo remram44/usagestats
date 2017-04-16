@@ -1,6 +1,13 @@
 Changelog
 =========
 
+0.6 (2017-04-15)
+----------------
+
+Bugfixes:
+* Check environment variable again before submitting
+* Don't log full report on INFO (make that DEBUG)
+
 0.5 (2016-03-04)
 ----------------
 

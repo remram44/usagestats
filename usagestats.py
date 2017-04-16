@@ -6,7 +6,7 @@ import time
 import sys
 
 
-__version__ = '0.5'
+__version__ = '0.6'
 
 
 logger = logging.getLogger('usagestats')
@@ -346,7 +346,7 @@ class Stats(object):
             fullname = os.path.join(self.location, old_filename)
             try:
                 with open(fullname, 'rb') as fp:
-                    # `data=f` would make requests stream, which is currently
+                    # `data=fp` would make requests stream, which is currently
                     # not a good idea (WSGI chokes on it)
                     r = requests.post(self.drop_point, data=fp.read(),
                                       timeout=1, verify=self.ssl_verify)
