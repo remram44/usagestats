@@ -134,7 +134,12 @@ class Stats(object):
         """
         self.started_time = time.time()
 
-        self.ssl_verify = ssl_verify
+        if ssl_verify is None or isinstance(ssl_verify, str):
+            self.ssl_verify = ssl_verify
+        elif isinstance(ssl_verify, bytes):  # bytes on PY3
+            self.ssl_verify = ssl_verify.decode('utf-8')
+        else:  # unicode on PY2
+            self.ssl_verify = ssl_verify.encode('utf-8')
 
         self.env_var = env_var
         env_val = os.environ.get(env_var, '').lower()
