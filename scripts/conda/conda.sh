@@ -40,7 +40,7 @@ absolutepathname(){
     echo "$(pwd)/$(basename "$1")"
 }
 
-for PYTHONVER in 2.7 3.5; do
+for PYTHONVER in 2.7 3.4 3.5 3.6; do
     for PKGNAME in usagestats; do
         TEMP_DIR="$(mktemp -d /tmp/rr_conda_XXXXXXXX)"
 
