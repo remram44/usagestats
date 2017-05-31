@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.7 (2017-05-31)
+----------------
+
+Bugfixes:
+* Stats submission can fail in `requests` on Python 3 if `ssl_verify` is `bytes` and not `str`.
+
 0.6 (2017-04-15)
 ----------------
 
