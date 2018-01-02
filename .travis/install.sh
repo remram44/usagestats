@@ -2,6 +2,9 @@
 
 set -eux
 
+# Update things
+pip install -U setuptools pip
+
 case "$TEST_MODE"
 in
     run_tests)
