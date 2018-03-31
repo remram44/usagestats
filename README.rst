@@ -1,6 +1,9 @@
 Usage statistics collector
 ==========================
 
+.. image:: https://img.shields.io/badge/Say%20Thanks-!-1EAEDB.svg
+   :target: https://saythanks.io/to/remram44
+
 This package is meant to easily get usage statistics from the users of your
 program.
 
