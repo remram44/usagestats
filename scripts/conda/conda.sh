@@ -40,55 +40,50 @@ absolutepathname(){
     echo "$(pwd)/$(basename "$1")"
 }
 
-for PYTHONVER in 2.7 3.4 3.5 3.6; do
-    for PKGNAME in usagestats; do
-        TEMP_DIR="$(mktemp -d /tmp/rr_conda_XXXXXXXX)"
+for PKGNAME in usagestats; do
+    TEMP_DIR="$(mktemp -d /tmp/rr_conda_XXXXXXXX)"
 
-        PKGDIR="$TOPLEVEL"
-        cd "$PKGDIR"
+    PKGDIR="$TOPLEVEL"
+    cd "$PKGDIR"
 
-        # Builds source distribution
-        if ! python setup.py sdist --dist-dir "$TEMP_DIR"; then
-            rm -Rf "$TEMP_DIR"
-            exit 1
-        fi
-
-        # Rename it
-        TEMP_FILE="$(echo $TEMP_DIR/*)"
-        mv "$TEMP_FILE" "$TEMP_DIR/$PKGNAME.tar.gz"
-
-        # Copies conda recipe
-        cp -r "$TOPLEVEL/scripts/conda/$PKGNAME" "$TEMP_DIR/$PKGNAME"
-
-        # Changes version in recipe
-        VERSION_ESCAPED="$(echo "$VERSION" | sed 's/\\/\\\\/g' | sed 's/\//\\\//g')"
-        sedi "s/_REPLACE_version_REPLACE_/$VERSION_ESCAPED/g" "$TEMP_DIR/$PKGNAME/meta.yaml"
-
-        # Changes URL
-        URL_ESCAPED="$(echo "file://$TEMP_DIR/$PKGNAME.tar.gz" | sed 's/\\/\\\\/g' | sed 's/\//\\\//g')"
-        sedi "s/_REPLACE_url_REPLACE_/$URL_ESCAPED/g" "$TEMP_DIR/$PKGNAME/meta.yaml"
-
-        # Change build string
-        sedi "s/_REPLACE_buildstr_REPLACE_/py$PYTHONVER/g" "$TEMP_DIR/$PKGNAME/meta.yaml"
-
-        # Builds Conda package
-        cd "$TEMP_DIR"
-        mkdir "$TEMP_DIR/croot"
-        OUTPUT_PKG="$(conda build --croot "$TEMP_DIR/croot" --python "$PYTHONVER" --output "$PKGNAME")"
-        OUTPUT_PKG="$(absolutepathname "$OUTPUT_PKG")"
-        if ! conda build --croot "$TEMP_DIR/croot" --python "$PYTHONVER" "$PKGNAME"; then
-            rm -Rf "$TEMP_DIR"
-            rm -f "$ANACONDA_CACHE"
-            exit 1
-        fi
-
-        # Copies result out
-        cd "$PKGDIR"
-        cp "$OUTPUT_PKG" "$DEST_DIR/"
-
-        # Removes temporary directory
+    # Builds source distribution
+    if ! python setup.py sdist --dist-dir "$TEMP_DIR"; then
         rm -Rf "$TEMP_DIR"
-    done
+        exit 1
+    fi
+
+    # Rename it
+    TEMP_FILE="$(echo $TEMP_DIR/*)"
+    mv "$TEMP_FILE" "$TEMP_DIR/$PKGNAME.tar.gz"
+
+    # Copies conda recipe
+    cp -r "$TOPLEVEL/scripts/conda/$PKGNAME" "$TEMP_DIR/$PKGNAME"
+
+    # Changes version in recipe
+    VERSION_ESCAPED="$(echo "$VERSION" | sed 's/\\/\\\\/g' | sed 's/\//\\\//g')"
+    sedi "s/_REPLACE_version_REPLACE_/$VERSION_ESCAPED/g" "$TEMP_DIR/$PKGNAME/meta.yaml"
+
+    # Changes URL
+    URL_ESCAPED="$(echo "file://$TEMP_DIR/$PKGNAME.tar.gz" | sed 's/\\/\\\\/g' | sed 's/\//\\\//g')"
+    sedi "s/_REPLACE_url_REPLACE_/$URL_ESCAPED/g" "$TEMP_DIR/$PKGNAME/meta.yaml"
+
+    # Builds Conda package
+    cd "$TEMP_DIR"
+    mkdir "$TEMP_DIR/croot"
+    OUTPUT_PKG="$(conda build --croot "$TEMP_DIR/croot" --output "$PKGNAME")"
+    OUTPUT_PKG="$(absolutepathname "$OUTPUT_PKG")"
+    if ! conda build --croot "$TEMP_DIR/croot" "$PKGNAME"; then
+        rm -Rf "$TEMP_DIR"
+        rm -f "$ANACONDA_CACHE"
+        exit 1
+    fi
+
+    # Copies result out
+    cd "$PKGDIR"
+    cp "$OUTPUT_PKG" "$DEST_DIR/"
+
+    # Removes temporary directory
+    rm -Rf "$TEMP_DIR"
 done
 
 # Clears Conda cache
