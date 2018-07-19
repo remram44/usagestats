@@ -53,9 +53,9 @@ for PYTHONVER in 2.7 3.4 3.5 3.6; do
             exit 1
         fi
 
-        # Creates symlink
+        # Rename it
         TEMP_FILE="$(echo $TEMP_DIR/*)"
-        ln -s "$TEMP_FILE" "$TEMP_DIR/$PKGNAME.tar.gz"
+        mv "$TEMP_FILE" "$TEMP_DIR/$PKGNAME.tar.gz"
 
         # Copies conda recipe
         cp -r "$TOPLEVEL/scripts/conda/$PKGNAME" "$TEMP_DIR/$PKGNAME"
