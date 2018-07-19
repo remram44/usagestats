@@ -11,7 +11,7 @@ with open('README.rst') as fp:
 setup(name='usagestats',
       version='0.7',
       py_modules=['usagestats'],
-      description="Anonymous usage statistics collecter",
+      description="Anonymous usage statistics collector",
       install_requires=['requests'],
       author="Remi Rampin",
       author_email='remirampin@gmail.com',

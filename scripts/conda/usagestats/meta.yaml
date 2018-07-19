@@ -51,7 +51,7 @@ test:
 about:
   home: https://github.com/remram44/usagestats
   license: Apache Software License
-  summary: 'Anonymous usage statistics collecter'
+  summary: 'Anonymous usage statistics collector'
 
 # See
 # http://docs.continuum.io/conda/build.html for
