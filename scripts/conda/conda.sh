@@ -73,9 +73,10 @@ for PYTHONVER in 2.7 3.4 3.5 3.6; do
 
         # Builds Conda package
         cd "$TEMP_DIR"
-        OUTPUT_PKG="$(conda build --python "$PYTHONVER" --output "$PKGNAME")"
+        mkdir "$TEMP_DIR/croot"
+        OUTPUT_PKG="$(conda build --croot "$TEMP_DIR/croot" --python "$PYTHONVER" --output "$PKGNAME")"
         OUTPUT_PKG="$(absolutepathname "$OUTPUT_PKG")"
-        if ! conda build --python "$PYTHONVER" "$PKGNAME"; then
+        if ! conda build --croot "$TEMP_DIR/croot" --python "$PYTHONVER" "$PKGNAME"; then
             rm -Rf "$TEMP_DIR"
             rm -f "$ANACONDA_CACHE"
             exit 1
