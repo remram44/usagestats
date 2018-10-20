@@ -1,12 +1,7 @@
 import locale
 import os
 import sys
-
-try:
-    import unittest2 as unittest
-    sys.modules['unittest'] = unittest
-except ImportError:
-    import unittest
+import unittest
 
 
 top_level = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
