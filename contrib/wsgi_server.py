@@ -77,7 +77,7 @@ def application(environ, start_response):
         status = '200 OK'
         response_body = "stored"
     else:
-        status = '501 Server Error'
+        status = '500 Server Error'
 
     # Sends the response
     return send_response(status, response_body)
