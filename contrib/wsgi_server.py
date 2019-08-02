@@ -1,7 +1,6 @@
 """Simple WSGI script to store the usage reports.
 """
 
-
 import os
 import re
 import time
@@ -38,8 +37,10 @@ def store(report, address):
                     if not isinstance(address, bytes):
                         address = address.encode('ascii')
                     fp.write(b'submitted_from:' + address + b'\n')
-                    fp.write(('submitted_date:%s\n' % submitted_date)
-                             .encode('ascii'))
+                    fp.write(
+                        ('submitted_date:%s\n' % submitted_date)
+                        .encode('ascii')
+                    )
                     fp.write(report)
                 return None
             else:
@@ -55,8 +56,13 @@ def application(environ, start_response):
         if not isinstance(body, bytes):
             body = body.encode('utf-8')
 
-        start_response(status, [('Content-Type', 'text/plain'),
-                                ('Content-Length', '%d' % len(body))])
+        start_response(
+            status,
+            [
+                ('Content-Type', 'text/plain'),
+                ('Content-Length', '%d' % len(body)),
+            ],
+        )
         return [body]
 
     if environ['REQUEST_METHOD'] != 'POST':
