@@ -42,8 +42,8 @@ class TestReporting(unittest.TestCase):
                 [sys.executable,
                  os.path.abspath(os.path.join(os.path.dirname(__file__),
                                               os.pardir,
-                                              'wsgi',
-                                              'usagestats_server.py'))],
+                                              'contrib',
+                                              'wsgi_server.py'))],
                 cwd=cls._recv_dir)
         time.sleep(2)
 
