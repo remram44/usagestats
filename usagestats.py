@@ -5,6 +5,8 @@ import requests
 import time
 import sys
 
+import distro
+
 
 __version__ = '0.7'
 
@@ -45,7 +47,7 @@ def OPERATING_SYSTEM(stats, info):
     """
     info.append(('architecture', platform.machine().lower()))
     info.append(('distribution',
-                 "%s;%s" % (platform.linux_distribution()[0:2])))
+                 "%s;%s" % (distro.linux_distribution()[0:2])))
     info.append(('system',
                  "%s;%s" % (platform.system(), platform.release())))
 
