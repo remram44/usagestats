@@ -1,11 +1,10 @@
+import distro
 import logging
 import os
 import platform
 import requests
 import time
 import sys
-
-import distro
 
 
 __version__ = '0.7'
