@@ -9,12 +9,12 @@ case "$TEST_MODE"
 in
     run_tests)
         pip install werkzeug
-        python setup.py install
+        pip install .
         ;;
     coverage)
         pip install coverage codecov
         pip install werkzeug
-        python setup.py install
+        pip install .
         ;;
     check_style)
         pip install flake8
