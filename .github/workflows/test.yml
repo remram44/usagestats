@@ -1,0 +1,59 @@
+name: Test
+
+on:
+  - push
+  - pull_request
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        mode: [run_tests]
+        python:
+        - "3.5"
+        - "3.8"
+        include:
+        - os: ubuntu-latest
+          mode: check_style
+          python: "2.7"
+        - os: ubuntu-latest
+          mode: coverage
+          python: "2.7"
+        - os: macos-latest
+          python: "2.7"
+        - os: macos-latest
+          python: "3.8"
+    runs-on: ${{ matrix.os }}
+    env:
+      TEST_MODE: ${{ matrix.mode }}
+      PYTHON_VERSION: ${{ matrix.python }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+    - name: Install dependencies
+      run: .ci/install.sh
+    - name: Test
+      run: .ci/test.sh
+    - name: Finish
+      run: .ci/finish.sh
+
+  test-windows:
+    strategy:
+      matrix:
+        os: [windows-latest]
+        python:
+        - "2.7"
+        - "3.8"
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python }}
+    - name: Install dependencies
+      run: ".ci\\install.bat"
+    - name: Test
+      run: ".ci\\test.bat"
