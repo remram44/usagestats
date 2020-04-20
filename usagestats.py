@@ -154,7 +154,7 @@ class Stats(object):
 
         if isinstance(prompt, Prompt):
             self.prompt = prompt
-        elif isinstance(prompt, basestring):
+        elif isinstance(prompt, str):
             self.prompt = Prompt(prompt)
         else:
             raise TypeError("'prompt' should either a Prompt or a string")
