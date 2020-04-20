@@ -79,7 +79,7 @@ def PYTHON_VERSION(stats, info):
 def _encode(s):
     if not isinstance(s, bytes):
         if str == bytes:  # Python 2
-            if isinstance(s, unicode):
+            if isinstance(s, unicode):  # noqa: F821
                 s = s.encode('utf-8')
             else:
                 s = str(s)

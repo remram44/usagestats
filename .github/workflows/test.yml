@@ -16,7 +16,7 @@ jobs:
         include:
         - os: ubuntu-latest
           mode: check_style
-          python: "2.7"
+          python: "3.8"
         - os: ubuntu-latest
           mode: coverage
           python: "2.7"
