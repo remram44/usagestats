@@ -10,6 +10,12 @@ import sys
 __version__ = '1.0'
 
 
+try:
+    import pathlib
+except ImportError:
+    pathlib = None
+
+
 logger = logging.getLogger('usagestats')
 
 
@@ -137,6 +143,8 @@ class Stats(object):
 
         if ssl_verify is None or isinstance(ssl_verify, str):
             self.ssl_verify = ssl_verify
+        elif pathlib and isinstance(ssl_verify, pathlib.Path):
+            self.ssl_verify = str(ssl_verify)
         elif isinstance(ssl_verify, bytes):  # bytes on PY3
             self.ssl_verify = ssl_verify.decode('utf-8')
         else:  # unicode on PY2
