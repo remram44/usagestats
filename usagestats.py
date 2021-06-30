@@ -344,8 +344,8 @@ class Stats(object):
         if not self.sending:
             fullname = os.path.join(self.location, filename)
             with open(fullname, 'wb') as fp:
-                for l in generator():
-                    fp.write(l)
+                for line in generator():
+                    fp.write(line)
 
             # Show prompt
             sys.stderr.write(self.prompt.prompt)
@@ -382,8 +382,8 @@ class Stats(object):
             logger.warning("Couldn't upload report: %s", str(e))
             fullname = os.path.join(self.location, filename)
             with open(fullname, 'wb') as fp:
-                for l in generator():
-                    fp.write(l)
+                for line in generator():
+                    fp.write(line)
         else:
             try:
                 r.raise_for_status()

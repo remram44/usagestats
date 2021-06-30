@@ -28,7 +28,7 @@ def store(report, address):
             break
         msecs += 1
 
-    lines = [l for l in report.split(b'\n') if l]
+    lines = [line for line in report.split(b'\n') if line]
     for line in lines:
         if line.startswith(b'date:'):
             date = line[5:]
