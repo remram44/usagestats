@@ -152,7 +152,10 @@ class Stats(object):
 
         self.env_var = env_var
         env_val = os.environ.get(env_var, '').lower()
+        dnt = os.environ.get('DO_NOT_TRACK')  # https://consoledonottrack.com/
         if env_val not in (None, '', '1', 'on', 'enabled', 'yes', 'true'):
+            self.status = Stats.DISABLED_ENV
+        elif dnt not in (None, '', '0', 'off', 'disabled', 'no', 'false'):
             self.status = Stats.DISABLED_ENV
         else:
             self.status = Stats.UNSET
